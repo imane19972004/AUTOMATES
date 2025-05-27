@@ -1,0 +1,2 @@
+entier nombre = lire();
+ecrire(nombre);
