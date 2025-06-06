@@ -141,7 +141,7 @@ def gen_operation(operation):
 		arm_instruction(code[op], "r1", "r0", "r1", "effectue l'opération r0" +op+"r1 et met le résultat dans r0" )
 	else:
 		erreur("operateur \""+op+"\" non implémenté")
-	arm_instruction("push",  "{r0}" , "", "", "empile le résultat")
+	arm_instruction("push",  "{r1}" , "", "", "empile le résultat")
 
 
 if __name__ == "__main__":
