@@ -1,0 +1,5 @@
+ecrire(VRAI);
+ecrire(FAUX);
+ecrire(VRAI et FAUX);
+ecrire(VRAI ou FAUX);
+ecrire(Non FAUX);

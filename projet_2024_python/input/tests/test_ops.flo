@@ -1,0 +1,4 @@
+ecrire(1 + 2 * 3);
+ecrire(10 / 2 - 3);
+ecrire(7 % 4);
+ecrire(-(5));  # Opérateur unaire correct

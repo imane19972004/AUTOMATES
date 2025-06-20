@@ -1,0 +1,5 @@
+entier test_priorite() {
+    entier a = 10 + 5 * 2 - 3 / 1 % 2;
+    retourner a;  # Devrait respecter la priorité: 10 + (5*2) - ((3/1)%2)
+}
+ecrire(test_priorite());

@@ -1,0 +1,54 @@
+ecrire(2==3);
+
+ecrire(2!=3);
+
+ecrire(2<=2);
+
+ecrire(2<=3);
+
+ecrire(2<=1);
+
+ecrire(2>=1);
+
+ecrire(2>=2);
+
+ecrire(2>=5);
+
+ecrire(2!=3);
+
+ecrire(2!=2);
+
+ecrire(3%2==0);
+
+ecrire(Vrai);
+
+booleen v = Vrai;
+
+booleen f = Faux;
+
+ecrire(v et f);
+
+ecrire(v ou f);
+
+ecrire(v et v);
+
+ecrire(f ou f);
+
+ecrire(f et f);
+
+ecrire(non v);
+
+ecrire(non f);
+
+ecrire (non f et non v);
+
+ecrire(non f ou v);
+
+ecrire(f ou non v);
+
+ecrire(f et v et v);
+
+ecrire( v ou f et f);
+
+ecrire (v ou (f et f));
+
