@@ -70,26 +70,14 @@ class Comparaison:
 class Entier:
     def __init__(self, valeur):
         self.valeur = valeur
-
     def afficher(self, indent=0):
         afficher(f"[Entier:{self.valeur}]", indent)
-
-    def generer_code(self):
-        return str(self.valeur)
-    
-    def verifier_type(self):
-        return "int"
-
 
 class Booleen:
     def __init__(self, valeur):
         self.valeur = valeur
     def afficher(self, indent=0):
         afficher(f"[Booleen:{self.valeur}]", indent)
-    def generer_code(self):
-        return str(int(self.valeur))  # True -> 1, False -> 0
-    def verifier_type(self):
-        return "booleen"
 
 class Variable:
     def __init__(self, nom):
@@ -222,48 +210,3 @@ class Fonction:
         self.corps.afficher(indent + 2)
         afficher("</corps>", indent + 1)
         afficher("</fonction>", indent)
-
-class Et:
-    def __init__(self, gauche, droite):
-        self.gauche = gauche
-        self.droite = droite
-
-    def generer_code(self):
-        gauche_code = self.gauche.generer_code()
-        droite_code = self.droite.generer_code()
-        return f"({gauche_code} * {droite_code})"
-
-    def verifier_type(self):
-        if self.gauche.verifier_type() != "bool" or self.droite.verifier_type() != "bool":
-            raise Exception("Erreur de type : 'et' attend deux booléens")
-        return "bool"
-    
-class Ou:
-    def __init__(self, gauche, droite):
-        self.gauche = gauche
-        self.droite = droite
-
-    def generer_code(self):
-        g = self.gauche.generer_code()
-        d = self.droite.generer_code()
-        return f"(min(1, {g} + {d}))"  # simulate: if sum >= 1 -> 1 else 0
-
-    def verifier_type(self):
-        if self.gauche.verifier_type() != "bool" or self.droite.verifier_type() != "bool":
-            raise Exception("Erreur de type : 'ou' attend deux booléens")
-        return "bool"
-
-class Non:
-    def __init__(self, expr):
-        self.expr = expr
-
-    def generer_code(self):
-        e = self.expr.generer_code()
-        return f"(1 - {e})"
-
-    def verifier_type(self):
-        if self.expr.verifier_type() != "bool":
-            raise Exception("Erreur de type : 'non' attend un booléen")
-        return "bool"
-
-

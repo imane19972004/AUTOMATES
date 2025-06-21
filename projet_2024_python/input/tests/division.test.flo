@@ -1,5 +1,0 @@
-ecrire (5 + 3);
-ecrire( 10 - 4);
-ecrire (8 * 2);
-ecrire (15 / 3);
-ecrire (17 % 5);

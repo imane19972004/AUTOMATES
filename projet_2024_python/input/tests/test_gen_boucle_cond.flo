@@ -1,0 +1,10 @@
+si (2 > 0) {
+    ecrire(100);
+} sinon {
+    ecrire(200);
+}
+
+
+tantque (1 < 3) {
+    ecrire(1);
+}

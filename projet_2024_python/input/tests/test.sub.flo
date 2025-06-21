@@ -1,5 +1,0 @@
-entier x = 5;
-entier y = 3;
-entier z;
-z = x - y;
-ecrire(z);

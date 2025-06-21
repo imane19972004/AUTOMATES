@@ -1,0 +1,9 @@
+entier carre(entier x) {
+    retourner x * x;
+}
+
+entier main() {
+    entier a = 5;
+    entier b = carre(a);
+    ecrire(b);
+}

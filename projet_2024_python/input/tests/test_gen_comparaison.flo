@@ -1,0 +1,6 @@
+ecrire(3 == 3);     # attendu : 1
+ecrire(5 != 2);     # attendu : 1
+ecrire(4 < 7);      # attendu : 1
+ecrire(10 > 20);    # attendu : 0
+ecrire(8 <= 8);     # attendu : 1
+ecrire(9 >= 10);    # attendu : 0

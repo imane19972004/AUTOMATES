@@ -1,3 +1,0 @@
-entier x;
-x = lire();
-ecrire(x);
