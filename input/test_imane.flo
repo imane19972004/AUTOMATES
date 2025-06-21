@@ -1,4 +1,5 @@
 ecrire(1 + 2 * 3);
+entier x=2;
 si (x > 5) {
     ecrire("Vrai");
 } sinon {

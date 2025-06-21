@@ -2,20 +2,15 @@ import sys
 from sly import Parser
 from analyse_lexicale import FloLexer
 import arbre_abstrait
+from table_symboles import TableSymboles
 
 class FloParser(Parser):
     tokens = FloLexer.tokens
-    precedence = (
-        ('right', 'UMINUS'),
-        ('left', 'OU'),
-        ('left', 'ET'),
-        ('right', 'NON'),
-        ('nonassoc', 'EGAL_EGAL', 'DIFFERENT', '<', '>', 'INFERIEUR_OU_EGAL', 'SUPERIEUR_OU_EGAL'),
-        ('left', '+', '-'),
-        ('left', '*', '/', '%'),
-    )
-
     debugfile = 'parser.out'
+
+    def __init__(self):
+        self.table_symboles = TableSymboles()
+        self.validation_active = True  # Pour contrôler la validation
 
     # Programme = liste d'instructions
     @_('listeInstructions')
@@ -42,114 +37,137 @@ class FloParser(Parser):
     def instruction(self, p):
         return arbre_abstrait.EcrireChaine(p.CHAINE)
 
-    # Expression booleenne ou arithmetique
-    @_('expr_booleen')
+    # Expression - niveau le plus élevé
+    @_('expr_ou')
     def expr(self, p):
-        return p.expr_booleen
+        return p.expr_ou
 
-    @_('expr_arith')
-    def expr_booleen(self, p):
-        return p.expr_arith
+    # Expressions booléennes avec hiérarchie explicite
+    # Niveau 1: OU (priorité la plus faible)
+    @_('expr_ou OU expr_et')
+    def expr_ou(self, p):
+        return arbre_abstrait.OperationLogique('ou', p.expr_ou, p.expr_et)
 
-    @_('VRAI')
-    def expr_booleen(self, p):
-        return arbre_abstrait.Booleen(True)
+    @_('expr_et')
+    def expr_ou(self, p):
+        return p.expr_et
 
-    @_('FAUX')
-    def expr_booleen(self, p):
-        return arbre_abstrait.Booleen(False)
+    # Niveau 2: ET
+    @_('expr_et ET expr_non')
+    def expr_et(self, p):
+        return arbre_abstrait.OperationLogique('et', p.expr_et, p.expr_non)
 
-    @_('NON expr_booleen')
-    def expr_booleen(self, p):
-        return arbre_abstrait.OperationLogique('non', p.expr_booleen, None)
+    @_('expr_non')
+    def expr_et(self, p):
+        return p.expr_non
 
-    @_('expr_booleen ET expr_booleen')
-    def expr_booleen(self, p):
-        return arbre_abstrait.OperationLogique('et', p.expr_booleen0, p.expr_booleen1)
+    # Niveau 3: NON (opérateur unaire)
+    @_('NON expr_non')
+    def expr_non(self, p):
+        return arbre_abstrait.OperationLogique('non', p.expr_non, None)
 
-    @_('expr_booleen OU expr_booleen')
-    def expr_booleen(self, p):
-        return arbre_abstrait.OperationLogique('ou', p.expr_booleen0, p.expr_booleen1)
+    @_('expr_comp')
+    def expr_non(self, p):
+        return p.expr_comp
 
-    @_('expr_arith EGAL_EGAL expr_arith')
-    def expr_booleen(self, p):
-        return arbre_abstrait.Comparaison('==', p.expr_arith0, p.expr_arith1)
+    # Niveau 4: Comparaisons
+    @_('expr_comp EGAL_EGAL expr_add')
+    def expr_comp(self, p):
+        return arbre_abstrait.Comparaison('==', p.expr_comp, p.expr_add)
 
-    @_('expr_arith DIFFERENT expr_arith')
-    def expr_booleen(self, p):
-        return arbre_abstrait.Comparaison('!=', p.expr_arith0, p.expr_arith1)
+    @_('expr_comp DIFFERENT expr_add')
+    def expr_comp(self, p):
+        return arbre_abstrait.Comparaison('!=', p.expr_comp, p.expr_add)
 
-    @_('expr_arith "<" expr_arith')
-    def expr_booleen(self, p):
-        return arbre_abstrait.Comparaison('<', p.expr_arith0, p.expr_arith1)
+    @_('expr_comp "<" expr_add')
+    def expr_comp(self, p):
+        return arbre_abstrait.Comparaison('<', p.expr_comp, p.expr_add)
 
-    @_('expr_arith ">" expr_arith')
-    def expr_booleen(self, p):
-        return arbre_abstrait.Comparaison('>', p.expr_arith0, p.expr_arith1)
+    @_('expr_comp ">" expr_add')
+    def expr_comp(self, p):
+        return arbre_abstrait.Comparaison('>', p.expr_comp, p.expr_add)
 
-    @_('expr_arith INFERIEUR_OU_EGAL expr_arith')
-    def expr_booleen(self, p):
-        return arbre_abstrait.Comparaison('<=', p.expr_arith0, p.expr_arith1)
+    @_('expr_comp INFERIEUR_OU_EGAL expr_add')
+    def expr_comp(self, p):
+        return arbre_abstrait.Comparaison('<=', p.expr_comp, p.expr_add)
 
-    @_('expr_arith SUPERIEUR_OU_EGAL expr_arith')
-    def expr_booleen(self, p):
-        return arbre_abstrait.Comparaison('>=', p.expr_arith0, p.expr_arith1)
+    @_('expr_comp SUPERIEUR_OU_EGAL expr_add')
+    def expr_comp(self, p):
+        return arbre_abstrait.Comparaison('>=', p.expr_comp, p.expr_add)
 
-    # Expressions arithmétiques (somme, produit, facteur)
-    @_('somme')
-    def expr_arith(self, p):
-        return p.somme
+    @_('expr_add')
+    def expr_comp(self, p):
+        return p.expr_add
 
-    @_('somme "+" produit')
-    def somme(self, p):
-        return arbre_abstrait.Operation('+', p.somme, p.produit)
+    # Niveau 5: Addition et soustraction
+    @_('expr_add "+" expr_mult')
+    def expr_add(self, p):
+        return arbre_abstrait.Operation('+', p.expr_add, p.expr_mult)
 
-    @_('somme "-" produit')
-    def somme(self, p):
-        return arbre_abstrait.Operation('-', p.somme, p.produit)
+    @_('expr_add "-" expr_mult')
+    def expr_add(self, p):
+        return arbre_abstrait.Operation('-', p.expr_add, p.expr_mult)
 
-    @_('produit')
-    def somme(self, p):
-        return p.produit
+    @_('expr_mult')
+    def expr_add(self, p):
+        return p.expr_mult
 
-    @_('produit "*" facteur')
-    def produit(self, p):
-        return arbre_abstrait.Operation('*', p.produit, p.facteur)
+    # Niveau 6: Multiplication, division, modulo
+    @_('expr_mult "*" expr_unaire')
+    def expr_mult(self, p):
+        return arbre_abstrait.Operation('*', p.expr_mult, p.expr_unaire)
 
-    @_('produit "/" facteur')
-    def produit(self, p):
-        return arbre_abstrait.Operation('/', p.produit, p.facteur)
+    @_('expr_mult "/" expr_unaire')
+    def expr_mult(self, p):
+        return arbre_abstrait.Operation('/', p.expr_mult, p.expr_unaire)
 
-    @_('produit "%" facteur')
-    def produit(self, p):
-        return arbre_abstrait.Operation('%', p.produit, p.facteur)
+    @_('expr_mult "%" expr_unaire')
+    def expr_mult(self, p):
+        return arbre_abstrait.Operation('%', p.expr_mult, p.expr_unaire)
 
-    @_('facteur')
-    def produit(self, p):
-        return p.facteur
+    @_('expr_unaire')
+    def expr_mult(self, p):
+        return p.expr_unaire
 
-    @_('"-" facteur %prec UMINUS')
-    def facteur(self, p):
-        return arbre_abstrait.Operation('neg', None, p.facteur)
+    # Niveau 7: Opérateurs unaires (priorité la plus élevée)
+    @_('"-" expr_unaire')
+    def expr_unaire(self, p):
+        return arbre_abstrait.Operation('-', exp1=p.expr_unaire)
 
+
+    @_('expr_primaire')
+    def expr_unaire(self, p):
+        return p.expr_primaire
+
+    # Niveau 8: Expressions primaires (atomes)
     @_('"(" expr ")"')
-    def facteur(self, p):
+    def expr_primaire(self, p):
         return p.expr
 
     @_('ENTIER')
-    def facteur(self, p):
+    def expr_primaire(self, p):
         return arbre_abstrait.Entier(p.ENTIER)
 
+    @_('VRAI')
+    def expr_primaire(self, p):
+        return arbre_abstrait.Booleen(True)
+
+    @_('FAUX')
+    def expr_primaire(self, p):
+        return arbre_abstrait.Booleen(False)
+
     @_('IDENTIFIANT')
-    def facteur(self, p):
-        return arbre_abstrait.Variable(p.IDENTIFIANT)
+    def expr_primaire(self, p):
+        # Ne pas valider pendant le parsing, juste créer le nœud
+        variable = arbre_abstrait.Variable(p.IDENTIFIANT)
+        return variable
 
     @_('LIRE "(" ")"')
-    def facteur(self, p):
+    def expr_primaire(self, p):
         return arbre_abstrait.Lire()
 
     @_('IDENTIFIANT "(" listeArgsOpt ")"')
-    def facteur(self, p):
+    def expr_primaire(self, p):
         return arbre_abstrait.AppelFonctionExpr(p.IDENTIFIANT, p.listeArgsOpt)
 
     # Gestion des types
@@ -164,14 +182,19 @@ class FloParser(Parser):
     # Déclaration simple ou avec affectation
     @_('type IDENTIFIANT ";"')
     def instruction(self, p):
+        if self.validation_active:
+            self.table_symboles.ajouter_variable(p.IDENTIFIANT, p.type, None)
         return arbre_abstrait.Declaration(p.type, p.IDENTIFIANT)
 
     @_('IDENTIFIANT "=" expr ";"')
     def instruction(self, p):
+        # Ne pas valider pendant le parsing des fonctions
         return arbre_abstrait.Affectation(p.IDENTIFIANT, p.expr)
 
     @_('type IDENTIFIANT "=" expr ";"')
     def instruction(self, p):
+        if self.validation_active:
+            self.table_symboles.ajouter_variable(p.IDENTIFIANT, p.type, None)
         return arbre_abstrait.DeclarationAffectation(p.type, p.IDENTIFIANT, p.expr)
 
     # Bloc d'instructions
@@ -203,9 +226,24 @@ class FloParser(Parser):
     def instruction(self, p):
         return arbre_abstrait.AppelFonctionInstr(p.IDENTIFIANT, p.listeArgsOpt)
 
+    # Définition de fonction
     @_('type IDENTIFIANT "(" listeParamsOpt ")" bloc')
     def instruction(self, p):
-        return arbre_abstrait.Fonction(p.type, p.IDENTIFIANT, p.listeParamsOpt, p.bloc)
+        # Désactiver la validation pendant le parsing du corps de la fonction
+        ancienne_validation = self.validation_active
+        self.validation_active = False
+        
+        # Créer le nœud fonction
+        fonction = arbre_abstrait.Fonction(p.type, p.IDENTIFIANT, p.listeParamsOpt, p.bloc)
+        
+        # Restaurer la validation
+        self.validation_active = ancienne_validation
+        
+        # Ajouter la fonction à la table des symboles
+        if self.validation_active:
+            self.table_symboles.ajouter_fonction(p.IDENTIFIANT, p.type, p.listeParamsOpt)
+        
+        return fonction
 
     # Liste des arguments pour appel de fonction
     @_('expr')
@@ -247,9 +285,69 @@ class FloParser(Parser):
         print('Erreur de syntaxe', p, file=sys.stderr)
         exit(1)
 
+def valider_semantique(arbre, table_symboles):
+    """Validation sémantique après le parsing"""
+    
+    def valider_noeud(noeud, contexte_fonction=None):
+        if isinstance(noeud, arbre_abstrait.Programme):
+            for instruction in noeud.listeInstructions.instructions:
+                if isinstance(instruction,arbre_abstrait.Fonction):
+                    table_symboles.ajouter_fonction(instruction.nom, instruction.type, instruction.params)
+            # Puis valider le reste
+            for instruction in noeud.listeInstructions.instructions:
+                if not isinstance(instruction, arbre_abstrait.Fonction):
+                    valider_noeud(instruction)
+                
+        elif isinstance(noeud, arbre_abstrait.Fonction):
+            # Créer un contexte temporaire pour la fonction
+            contexte_local = {}
+            for type_param, nom_param in noeud.params:
+                contexte_local[nom_param] = type_param
+            
+            # Valider le corps avec ce contexte
+            valider_noeud(noeud.corps, contexte_local)
+            
+        elif isinstance(noeud, arbre_abstrait.ListeInstructions):
+            for instruction in noeud.instructions:
+                valider_noeud(instruction, contexte_fonction)
+                
+        elif isinstance(noeud, arbre_abstrait.Variable):
+            # Vérifier si la variable existe
+            if contexte_fonction and noeud.nom in contexte_fonction:
+                noeud.type = contexte_fonction[noeud.nom]
+            else:
+                var_info = table_symboles.get_variable(noeud.nom)
+                if var_info is None:
+                    raise Exception(f"Erreur : variable '{noeud.nom}' non déclarée.")
+                noeud.type = var_info['type']
+                noeud.adresse = var_info['adresse']
+                
+        elif isinstance(noeud, arbre_abstrait.Affectation):
+            # Vérifier que la variable existe
+            if contexte_fonction and noeud.nom in contexte_fonction:
+                pass  # OK, c'est un paramètre
+            else:
+                var_info = table_symboles.get_variable(noeud.nom)
+                if var_info is None:
+                    raise Exception(f"Erreur : variable '{noeud.nom}' non déclarée.")
+            valider_noeud(noeud.expr, contexte_fonction)
+            
+        # Continuer la validation récursivement pour les autres types de nœuds
+        elif hasattr(noeud, '__dict__'):
+            for attr_name, attr_value in noeud.__dict__.items():
+                if isinstance(attr_value, (list, tuple)):
+                    for item in attr_value:
+                        if hasattr(item, 'afficher'):  # C'est probablement un nœud de l'AST
+                            valider_noeud(item, contexte_fonction)
+                elif hasattr(attr_value, 'afficher'):  # C'est probablement un nœud de l'AST
+                    valider_noeud(attr_value, contexte_fonction)
+    
+    valider_noeud(arbre)
+
 if __name__ == '__main__':
     lexer = FloLexer()
     parser = FloParser()
+
     if len(sys.argv) < 2:
         print("usage: python3 analyse_syntaxique.py NOM_FICHIER_SOURCE.flo")
     else:
@@ -257,6 +355,14 @@ if __name__ == '__main__':
             data = f.read()
             try:
                 arbre = parser.parse(lexer.tokenize(data))
-                arbre.afficher()
+                if arbre:
+                    # Faire la validation sémantique après le parsing
+                    valider_semantique(arbre, parser.table_symboles)
+                    arbre.afficher()
+                else:
+                    print("Erreur: Aucun arbre généré")
             except EOFError:
+                exit(1)
+            except Exception as e:
+                print(f"Erreur lors du parsing: {e}", file=sys.stderr)
                 exit(1)

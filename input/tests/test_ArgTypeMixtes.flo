@@ -1,0 +1,9 @@
+entier conditionnel(booleen condition, entier valeur) {
+    si (condition) {
+        retourner valeur;
+    }
+    retourner 0;
+}
+
+ecrire(conditionnel(Vrai, 42));
+ecrire(conditionnel(Faux, 42));

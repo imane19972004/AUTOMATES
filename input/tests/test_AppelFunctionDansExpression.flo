@@ -1,0 +1,9 @@
+entier a() {
+    retourner 5;
+}
+
+entier b() {
+    retourner 3;
+}
+
+ecrire(a() + b());

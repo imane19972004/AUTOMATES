@@ -1,0 +1,9 @@
+entier g() {
+    retourner h();
+}
+
+entier h() {
+    retourner 77;
+}
+
+ecrire(g());

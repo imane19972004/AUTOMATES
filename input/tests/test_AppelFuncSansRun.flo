@@ -1,0 +1,7 @@
+entier afficherMessage() {
+    ecrire(123);
+    retourner 0;
+}
+
+afficherMessage();
+ecrire(456);

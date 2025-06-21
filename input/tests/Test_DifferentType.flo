@@ -1,0 +1,10 @@
+entier getEntier() {
+    retourner 100;
+}
+
+booleen getBooleen() {
+    retourner Vrai;
+}
+
+ecrire(getEntier());
+ecrire(getBooleen());

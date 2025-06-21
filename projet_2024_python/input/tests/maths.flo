@@ -1,7 +1,0 @@
- entier usage_tous_ops (entier a, entier b, entier c){
-entier resultat;
-# Calculs mathématiques utilisant tous les opérateurs
-resultat = (a + b) * c - (a / b) + (a % b);
-retourner resultat;
-}
-ecrire(usage_tous_ops(4,2,1)); #4

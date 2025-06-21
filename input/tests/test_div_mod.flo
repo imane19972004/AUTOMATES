@@ -1,0 +1,8 @@
+ecrire(10 / 3);
+ecrire(10 %  3);
+ecrire(-10 / 3);
+ecrire(-10 % 3);
+ecrire(10 / -3);
+ecrire(10 % -3);
+ecrire(-10 / -3);
+ecrire(-10 % -3);

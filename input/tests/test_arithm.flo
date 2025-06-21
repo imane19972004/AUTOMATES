@@ -1,0 +1,27 @@
+entier main() {
+    entier a = 20;
+    entier b = 5;
+    entier c;
+
+    ecrire(10 + 5);      
+    ecrire(20 * 3);     
+
+    ecrire(a - b);       
+    ecrire(100 - 42);  
+
+
+    ecrire(a / b);       
+    ecrire(17 / 3);      
+    ecrire(a % b);       
+    ecrire(17 % 3);      
+
+    c = (a * 2) - (b + 1); 
+    ecrire(c);           
+
+    c = (a / 4) + (b % 2); 
+    ecrire(c);           
+
+    ecrire(50 / (10 - 5)); 
+
+    retour (0);
+}

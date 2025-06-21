@@ -1,4 +1,0 @@
-entier x;
-entier y = 2;
-x = 5 + y;
-ecrire(x);

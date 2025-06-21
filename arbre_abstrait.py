@@ -33,15 +33,16 @@ class EcrireChaine:
         afficher(f"<ecrire chaine={self.chaine}>", indent)
 
 class Operation:
-    def __init__(self, op, exp1, exp2):
+    def __init__(self, op, exp1, exp2=None):
         self.exp1 = exp1
         self.op = op
         self.exp2 = exp2
+        self.type = None
     def afficher(self, indent=0):
-        afficher(f"<operation {self.op}>", indent)
-        if self.exp1 is not None:
-            self.exp1.afficher(indent + 1)
-        self.exp2.afficher(indent + 1)
+        afficher(f'<operation "{self.op}">', indent)
+        self.exp1.afficher(indent + 1)
+        if self.exp2 is not None:
+            self.exp2.afficher(indent + 1)
         afficher("</operation>", indent)
 
 class OperationLogique:
@@ -70,21 +71,24 @@ class Comparaison:
 class Entier:
     def __init__(self, valeur):
         self.valeur = valeur
+        self.type = 'entier'  # CORRECTION: 'entier' au lieu de 'booleen'
     def afficher(self, indent=0):
         afficher(f"[Entier:{self.valeur}]", indent)
 
 class Booleen:
     def __init__(self, valeur):
         self.valeur = valeur
+        self.type = 'booleen'
     def afficher(self, indent=0):
         afficher(f"[Booleen:{self.valeur}]", indent)
 
 class Variable:
     def __init__(self, nom):
         self.nom = nom
+        self.type = None  # Sera rempli lors de la validation sémantique
+        self.adresse = None
     def afficher(self, indent=0):
         afficher(f"[Variable:{self.nom}]", indent)
-
 class Lire:
     def __init__(self):
         pass

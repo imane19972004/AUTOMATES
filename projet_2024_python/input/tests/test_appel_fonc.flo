@@ -1,5 +1,0 @@
-entier f() {
-    retourner 42;
-}
-entier x = f();
-ecrire(x);

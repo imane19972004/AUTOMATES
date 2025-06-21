@@ -1,6 +1,0 @@
-ecrire(1 + 2 * 3);
-si (x > 5) {
-    ecrire("Vrai");
-} sinon {
-    ecrire("Faux");
-}

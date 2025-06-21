@@ -1,8 +1,9 @@
 class TableSymboles:
     def __init__(self):
-        self.fonctions = {}  
-        self.variables = []  
-        self.profondeur = 0
+        self.fonctions = {}  # Dictionnaire pour stocker les fonctions
+        self.variables = []   # Liste pour stocker les variables
+        self.profondeur = 0   # Profondeur actuelle pour la gestion des blocs
+        self.symboles = {}    # Dictionnaire pour stocker les symboles
 
     def ajouter_fonction(self, nom, type_retour, params):
         if nom in self.fonctions:
@@ -25,15 +26,23 @@ class TableSymboles:
         self.profondeur += 1
 
     def sortir_bloc(self):
-        self.variables = [v for v in self.variables if v[3] < self.profondeur]
+        self.variables = [v for v in self.variables if v[3] < self.profondeur]  # Garder les variables de la profondeur actuelle
         self.profondeur -= 1
 
-    def ajouter_variable(self, nom, type_, adresse):
+
+    def ajouter_variable(self, nom, type_, adresse=None):
+        """Ajoute une variable à la table des symboles"""
+        # Si adresse n'est pas spécifiée, calculer automatiquement
+        if adresse is None:
+            adresse = -4 * (len([v for v in self.variables if v[3] == self.profondeur]) + 1)
+        
+        # Vérifier si la variable existe déjà dans ce bloc
         for v in self.variables:
             if v[0] == nom and v[3] == self.profondeur:
                 raise Exception(f"Variable '{nom}' déjà déclarée dans ce bloc")
+        
         self.variables.append((nom, type_, adresse, self.profondeur))
-
+    
     def get_variable(self, nom):
         for v in reversed(self.variables):
             if v[0] == nom:
@@ -49,3 +58,10 @@ class TableSymboles:
                 'adresse': f['adresse_args'][nom]
             }
         return None
+
+    def get_type_et_adresse(self, nom):
+        """Retourne le type et l'adresse d'une variable."""
+        var_info = self.get_variable(nom)
+        if var_info:
+            return var_info['type'], var_info['adresse']
+        return None, None  # Variable non trouvée
